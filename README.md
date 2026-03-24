@@ -2,8 +2,11 @@
 
 ## Table des matières
 
-- [But](#but)
-- [Architecture](#architecture)
+- [Vue d'ensemble du projet](#vue-densemble-du-projet)
+- [Architecture générale](#architecture-générale)
+- [Sous-projets](#sous-projets)
+- [Ce que fait le simulateur](#ce-que-fait-le-simulateur)
+- [Architecture du simulateur](#architecture-du-simulateur)
 - [Hiérarchie du code](#hiérarchie-du-code)
 - [Installation](#installation)
 - [Lancement recommandé](#lancement-recommandé)
@@ -15,16 +18,70 @@
 
 Simulateur BLE local pour tester `dtn-sentinel`.
 
-## But
+## Vue d'ensemble du projet
+
+Le projet complet contient deux parties :
+
+- `dtn-sentinel/` : l'application mobile Android
+- `sentinelle-simulator/` : le simulateur local qui imite une vraie sentinelle Bluetooth
+
+Le fonctionnement général est le suivant :
+
+1. le simulateur affiche un QR code
+2. l'application scanne ce QR code
+3. le téléphone se connecte en `BLE` (Bluetooth Low Energy) au simulateur
+4. le simulateur envoie un paquet `pending`, c'est-à-dire un ancien paquet stocké d'avance
+5. il envoie ensuite des paquets `live`, c'est-à-dire des mesures en direct
+6. l'application répond avec un `ACK`, c'est-à-dire une confirmation de réception
+
+## Architecture générale
+
+```text
+┌──────────────────────┐        BLE         ┌────────────────────────┐
+│ dtn-sentinel         │ <────────────────> │ sentinelle-simulator   │
+│ App Android          │                    │ Sentinelle simulée     │
+└──────────┬───────────┘                    └────────────┬───────────┘
+           │                                             │
+           │ QR code                                     │
+           └─────────────────────────────────────────────┘
+
+           │
+           │ HTTP / Sync quand réseau disponible
+           v
+┌──────────────────────┐
+│ Cloud API            │
+│ serveur prévu        │
+└──────────────────────┘
+```
+
+Ici :
+
+- le simulateur remplace une vraie sentinelle
+- le QR code permet à l'app de connaître son identité
+- le BLE sert au transfert des données
+- le cloud n'est pas géré par ce dossier, mais fait partie du projet global
+
+## Sous-projets
+
+```text
+IotPaulSab/
+├── dtn-sentinel/          # application mobile
+└── sentinelle-simulator/  # simulateur BLE local
+```
+
+Ce README documente surtout `sentinelle-simulator`, mais il contient aussi les
+informations générales utiles pour comprendre tout le projet.
+
+## Ce que fait le simulateur
 
 Ce dossier sert à simuler une vraie sentinelle BLE :
 
 - il affiche un QR code d'appairage
-- il expose les caractéristiques GATT attendues par l'app
+- il expose les caractéristiques `GATT`, c'est-à-dire les points de lecture/écriture BLE attendus par l'app
 - il envoie un paquet `pending`
-- il pousse ensuite des paquets live
+- il pousse ensuite des paquets `live`
 
-## Architecture
+## Architecture du simulateur
 
 ```text
 index.js
@@ -60,11 +117,11 @@ sentinelle-simulator/
 
 À quoi sert chaque fichier :
 
-- `index.js` : lance le simulateur
-- `ble-peripheral.js` : implémente le périphérique BLE
-- `data-generator.js` : définit les paquets envoyés
-- `sentinelle-simulator.py` : alternative Python
-- `package.json` : commandes de lancement
+- `index.js` : démarre le simulateur et affiche le QR code
+- `ble-peripheral.js` : crée le faux périphérique BLE
+- `data-generator.js` : fabrique les données envoyées
+- `sentinelle-simulator.py` : version Python du simulateur
+- `package.json` : commandes pour lancer le projet
 
 ## Installation
 
@@ -79,7 +136,7 @@ npm install
 npm run start:node
 ```
 
-C'est le chemin utilisé pour les tests Android du projet.
+C'est la méthode recommandée pour tester avec l'app Android.
 
 ## Scripts
 
@@ -99,6 +156,11 @@ npm run setup
 - la variante Python utilise `.venv/bin/python3`
 - donc la variante Python n'est pas compatible Windows telle quelle
 
+En clair :
+
+- utilise `npm run start:node`
+- n'utilise la version Python que si tu sais pourquoi tu en as besoin
+
 ## Utilisation avec l'app
 
 1. lancer le simulateur :
@@ -111,6 +173,12 @@ npm run start:node
 3. ouvrir le dev build Android
 4. appairer par QR
 5. signer le contrat
+
+En clair :
+
+- le simulateur affiche un QR code
+- l'app scanne ce QR code
+- ensuite l'app se connecte au faux capteur BLE
 
 ## Logs attendus
 
@@ -126,3 +194,8 @@ npm run start:node
 - macOS : recommandé
 - Windows : non prêt simplement
 - Linux : non validé
+
+Pour le projet complet :
+
+- l'app Android peut être développée sur plusieurs systèmes
+- le simulateur local reste surtout simple à lancer sur macOS
