@@ -154,7 +154,6 @@ npm run setup
 
 - les paquets ont été compactés pour rester compatibles avec le flux BLE Android testé
 - la variante Python utilise `.venv/bin/python3`
-- donc la variante Python n'est pas compatible Windows telle quelle
 
 En clair :
 
@@ -192,10 +191,36 @@ En clair :
 ## Portabilité
 
 - macOS : recommandé
-- Windows : non prêt simplement
-- Linux : non validé
+- Windows : oui avec le lancement recommandé en Node.js
+- Linux : à valider selon la machine et le Bluetooth disponible
 
 Pour le projet complet :
 
 - l'app Android peut être développée sur plusieurs systèmes
-- le simulateur local reste surtout simple à lancer sur macOS
+- le simulateur local peut aussi être lancé sur Windows en suivant le chemin Node.js
+
+### Utilisation sur Windows
+
+Pour Windows, le chemin recommandé est d'utiliser la version Node.js du simulateur.
+
+Commandes PowerShell :
+
+```powershell
+cd C:\chemin\vers\IotPaulSab\sentinelle-simulator
+npm install
+npm run start:node
+```
+
+Si tu veux lancer la version Python sur Windows, utilise les commandes Windows du venv :
+
+```powershell
+cd C:\chemin\vers\IotPaulSab\sentinelle-simulator
+py -3 -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+.venv\Scripts\python.exe sentinelle-simulator.py
+```
+
+À retenir :
+
+- sur Windows, la méthode à utiliser en premier est `npm run start:node`
+- la version Python peut aussi être lancée avec les commandes Windows ci-dessus
