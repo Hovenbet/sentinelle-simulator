@@ -1,0 +1,19 @@
+{
+  "name": "sentinelle-simulator",
+  "version": "1.0.0",
+  "description": "Simulateur BLE de sentinelle environnementale DTN",
+  "main": "index.js",
+  "scripts": {
+    "start": ".venv/bin/python3 sentinelle-simulator.py",
+    "setup": "python3 -m venv .venv && .venv/bin/pip install bless qrcode",
+    "start:node": "node index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@abandonware/bleno": "^0.6.2",
+    "qrcode-terminal": "^0.12.0",
+    "uuid": "^9.0.1"
+  }
+}
